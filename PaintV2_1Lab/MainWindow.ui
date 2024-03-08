@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>37</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuLoad_Image">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+    <addaction name="action"/>
+    <addaction name="action_3"/>
+    <addaction name="action_15"/>
+    <addaction name="action_16"/>
+   </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Редактирование</string>
+    </property>
+    <widget class="QMenu" name="menu_3">
+     <property name="title">
+      <string>Цветокоррекция</string>
+     </property>
+     <addaction name="action_20"/>
+     <addaction name="action_21"/>
+    </widget>
+    <widget class="QMenu" name="menu_4">
+     <property name="title">
+      <string>Трансформации</string>
+     </property>
+     <addaction name="action_23"/>
+     <addaction name="action_24"/>
+    </widget>
+    <widget class="QMenu" name="menu_5">
+     <property name="title">
+      <string>Фильтры</string>
+     </property>
+     <addaction name="action_26"/>
+     <addaction name="action_27"/>
+    </widget>
+    <addaction name="action_4"/>
+    <addaction name="menu_3"/>
+    <addaction name="menu_4"/>
+    <addaction name="menu_5"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Анализ</string>
+    </property>
+    <widget class="QMenu" name="menu_6">
+     <property name="title">
+      <string>Цветовые каналы</string>
+     </property>
+     <addaction name="action_29"/>
+     <addaction name="action_30"/>
+     <addaction name="action_31"/>
+    </widget>
+    <addaction name="action_14"/>
+    <addaction name="menu_6"/>
+    <addaction name="action_32"/>
+    <addaction name="action_33"/>
+    <addaction name="action_34"/>
+   </widget>
+   <widget class="QMenu" name="menu_7">
+    <property name="title">
+     <string>Инструменты</string>
+    </property>
+    <addaction name="action_35"/>
+    <addaction name="action_36"/>
+    <addaction name="action_37"/>
+   </widget>
+   <addaction name="menuLoad_Image"/>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+   <addaction name="menu_7"/>
+  </widget>
+  <action name="action">
+   <property name="text">
+    <string>Открыть</string>
+   </property>
+   <property name="whatsThis">
+    <string>Загрузка изображения</string>
+   </property>
+  </action>
+  <action name="action_2">
+   <property name="text">
+    <string>Экспортировать</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>Сохранить</string>
+   </property>
+  </action>
+  <action name="action_4">
+   <property name="text">
+    <string>Яркость/Контрастность</string>
+   </property>
+  </action>
+  <action name="action_5">
+   <property name="text">
+    <string>Проанализировать &quot;однородные&quot; и &quot;неоднородные&quot; области</string>
+   </property>
+  </action>
+  <action name="action_6">
+   <property name="text">
+    <string>Изменить яркость</string>
+   </property>
+  </action>
+  <action name="action_7">
+   <property name="text">
+    <string>Изменить контрастность</string>
+   </property>
+  </action>
+  <action name="action_10">
+   <property name="text">
+    <string>Получить негатив</string>
+   </property>
+  </action>
+  <action name="action_11">
+   <property name="text">
+    <string>Обмен цветовых каналов</string>
+   </property>
+  </action>
+  <action name="action_12">
+   <property name="text">
+    <string>Симметричное отображение</string>
+   </property>
+  </action>
+  <action name="action_13">
+   <property name="text">
+    <string>Удаление шума</string>
+   </property>
+  </action>
+  <action name="action_14">
+   <property name="text">
+    <string>Гистограмма яркости</string>
+   </property>
+  </action>
+  <action name="action_15">
+   <property name="text">
+    <string>Сохранить как</string>
+   </property>
+  </action>
+  <action name="action_16">
+   <property name="text">
+    <string>Выход</string>
+   </property>
+  </action>
+  <action name="action_20">
+   <property name="text">
+    <string>Инверсия</string>
+   </property>
+  </action>
+  <action name="action_21">
+   <property name="text">
+    <string>Обмен цветовых каналов</string>
+   </property>
+  </action>
+  <action name="action_23">
+   <property name="text">
+    <string>Отражение</string>
+   </property>
+  </action>
+  <action name="action_24">
+   <property name="text">
+    <string>Поворот</string>
+   </property>
+  </action>
+  <action name="action_26">
+   <property name="text">
+    <string>Удаление шума</string>
+   </property>
+  </action>
+  <action name="action_27">
+   <property name="text">
+    <string>Острота</string>
+   </property>
+  </action>
+  <action name="action_29">
+   <property name="text">
+    <string>Красный</string>
+   </property>
+  </action>
+  <action name="action_30">
+   <property name="text">
+    <string>Зеленый</string>
+   </property>
+  </action>
+  <action name="action_31">
+   <property name="text">
+    <string>Синий</string>
+   </property>
+  </action>
+  <action name="action_32">
+   <property name="text">
+    <string>Черно-белое изображение</string>
+   </property>
+  </action>
+  <action name="action_33">
+   <property name="text">
+    <string>Анализ областей</string>
+   </property>
+  </action>
+  <action name="action_34">
+   <property name="text">
+    <string>Карта контрастности</string>
+   </property>
+  </action>
+  <action name="action_35">
+   <property name="text">
+    <string>Информация о пикселе</string>
+   </property>
+  </action>
+  <action name="action_36">
+   <property name="text">
+    <string>Профиль яркости</string>
+   </property>
+  </action>
+  <action name="action_37">
+   <property name="text">
+    <string>Настройки</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
