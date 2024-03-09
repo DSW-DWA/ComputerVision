@@ -1,39 +1,50 @@
+import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
-from PyQt6.QtGui import QPixmap, QImage
-from PyQt6.QtWidgets import QFileDialog, QLabel
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtWidgets import QMainWindow, QLabel, QFileDialog
+
+from BrightnessContrastDialog import BrightnessContrastDialog
 from ImageEditor import ImageEditor
+import cv2
 
 
-class UiMainWindow(object):
+class UiMainWindow(QMainWindow):
     def __init__(self):
+        super().__init__()
+        self.imageLabel = QLabel(self)
         self.image = None
         self.imageEditor = None
+        self.brightnessContrastDialog = BrightnessContrastDialog(self)
+        self.setupUi(self)
+        self.connectSignals()
 
     def connectSignals(self):
         self.actionOpen.triggered.connect(self.openImage)
-        self.actionAdjustBrightnessContrast.triggered.connect(self.adjustBrightnessContrast)
+        self.actionAdjustBrightnessContrast.triggered.connect(lambda: self.brightnessContrastDialog.show())
+        self.brightnessContrastDialog.brightnessChanged.connect(self.updateImage)
+        self.brightnessContrastDialog.contrastChanged.connect(self.updateImage)
 
     def openImage(self):
-        file_path, _ = QFileDialog.getOpenFileName(self.centralWidget, "Open Image", "", "Images (*.bmp *.png *.tiff)")
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "Images (*.jpg *.jpeg *.png *.bmp *.tiff)")
         if file_path:
-            self.image = QImage(file_path)
+            self.image = cv2.imread(file_path)
             self.imageEditor = ImageEditor(self.image)
             self.showImage(self.imageEditor.image)
 
-    def adjustBrightnessContrast(self):
-        if hasattr(self, 'imageEditor'):
-            # Для примера используем яркость 10 и контраст 10
-            self.imageEditor.adjustBrightnessContrast(10, 10)
-            self.showImage(self.imageEditor.image)
+    def updateImage(self):
+        if self.imageEditor:
+            brightness = self.brightnessContrastDialog.brightnessSlider.value()
+            contrast = self.brightnessContrastDialog.contrastSlider.value()
+            adjustedImage = self.imageEditor.adjustBrightnessContrast(brightness, contrast)
+            self.showImage(adjustedImage)
 
-    def invertColors(self):
-        if hasattr(self, 'imageEditor'):
-            self.imageEditor.invertColors()
-            self.showImage(self.imageEditor.image)
-
-    def showImage(self, image: QImage):
-        pixmap = QPixmap.fromImage(image)
-        self.imageLabel.setPixmap(pixmap.scaled(self.imageLabel.size(), QtCore.Qt.AspectRatioMode.KeepAspectRatio))
+    def showImage(self, image):
+        height, width, channels = image.shape
+        bytesPerLine = channels * width
+        qImg = QImage(image.data, width, height, bytesPerLine, QImage.Format.Format_RGB888).rgbSwapped()
+        pixmap = QPixmap.fromImage(qImg)
+        self.imageLabel.setPixmap(pixmap.scaled(self.imageLabel.size(), Qt.AspectRatioMode.KeepAspectRatio))
 
     def setupUi(self, main_window):
         main_window.setObjectName("MainWindow")
