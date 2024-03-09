@@ -7,7 +7,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import QFileDialog, QLabel, QMainWindow
-
+from ImageAnalysis import ImageAnalysis
 
 class UiMainWindow(QMainWindow):
     def __init__(self):
@@ -45,6 +45,14 @@ class UiMainWindow(QMainWindow):
         self.actionSaveAs.triggered.connect(self.saveImageAs)
 
         self.actionSave.triggered.connect(self.saveImage)
+        self.actionAdjustBrightnessContrast.triggered.connect(self.adjustBrightnessContrast)
+        self.actionBlackWhite.triggered.connect(self.blackWhite)
+        self.actionRedChannel.triggered.connect(self.redChannel)
+        self.actionGreenChannel.triggered.connect(self.greenChannel)
+        self.actionBlueChannel.triggered.connect(self.blueChannel)
+        self.actionRegionAnalysis.triggered.connect(self.RegionAnalysis)
+        self.actionContrastMap.triggered.connect(self.ContrastMapViewer)
+        self.actionBrightnessProfile.triggered.connect(self.BrightnessProfileViewer)
 
     def onOkButtonClicked(self):
         if self.imageEditor:
@@ -62,6 +70,8 @@ class UiMainWindow(QMainWindow):
             self.image = cv2.imread(file_path)
             self.imageEditor = ImageEditor(self.image)
             self.showImage(self.imageEditor.change_image)
+            self.imageAnalysis = ImageAnalysis(cv2.imread(file_path))
+            self.showImage(self.imageEditor.image)
 
             self.actionAdjustBrightnessContrast.setEnabled(True)
             self.actionInversion.setEnabled(True)
@@ -73,6 +83,13 @@ class UiMainWindow(QMainWindow):
             self.actionReset.setEnabled(True)
             self.actionSave.setEnabled(True)
             self.actionSaveAs.setEnabled(True)
+            self.actionRedChannel.setEnabled(True)
+            self.actionGreenChannel.setEnabled(True)
+            self.actionBlueChannel.setEnabled(True)
+            self.actionBlackWhite.setEnabled(True)
+            self.actionRegionAnalysis.setEnabled(True)
+            self.actionContrastMap.setEnabled(True)
+            self.actionBrightnessProfile.setEnabled(True)
 
     def saveImageAs(self):
         if self.imageEditor and self.imageEditor.getImage() is not None:
@@ -150,6 +167,34 @@ class UiMainWindow(QMainWindow):
         self.imageLabel.setPixmap(pixmap)
         self.imageLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+    def blackWhite(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.blackWhite()
+
+    def redChannel(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.redChannel()
+
+    def greenChannel(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.greenChannel()
+
+    def blueChannel(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.blueChannel()
+
+    def RegionAnalysis(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.RegionAnalysis()
+
+    def ContrastMapViewer(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.ContrastMapViewer()
+
+    def BrightnessProfileViewer(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.BrightnessProfileViewer()
+
     def setupUi(self, main_window):
         main_window.setObjectName("MainWindow")
         main_window.resize(800, 600)
@@ -195,8 +240,6 @@ class UiMainWindow(QMainWindow):
         self.actionNegative.setObjectName("actionNegative")
         self.actionMirrorDisplay = QtGui.QAction(parent=main_window)
         self.actionMirrorDisplay.setObjectName("actionMirrorDisplay")
-        self.actionBrightnessHistogram = QtGui.QAction(parent=main_window)
-        self.actionBrightnessHistogram.setObjectName("actionBrightnessHistogram")
         self.actionInversion = QtGui.QAction(parent=main_window)
         self.actionInversion.setObjectName("actionInversion")
         self.actionColorChannelsSwap = QtGui.QAction(parent=main_window)
@@ -238,7 +281,7 @@ class UiMainWindow(QMainWindow):
         self.actionContrastChange.setEnabled(False)
         self.actionNegative.setEnabled(False)
         self.actionMirrorDisplay.setEnabled(False)
-        self.actionBrightnessHistogram.setEnabled(False)
+        self.actionExit.setEnabled(False)
         self.actionInversion.setEnabled(False)
         self.actionColorChannelsSwap.setEnabled(False)
         self.actionFlipVertical.setEnabled(False)
@@ -292,7 +335,6 @@ class UiMainWindow(QMainWindow):
         self.menuColorChannels.addAction(self.actionRedChannel)
         self.menuColorChannels.addAction(self.actionGreenChannel)
         self.menuColorChannels.addAction(self.actionBlueChannel)
-        self.menuAnalysis.addAction(self.actionBrightnessHistogram)
         self.menuAnalysis.addAction(self.menuColorChannels.menuAction())
         self.menuAnalysis.addAction(self.actionBlackWhite)
         self.menuAnalysis.addAction(self.actionRegionAnalysis)
@@ -353,6 +395,5 @@ class UiMainWindow(QMainWindow):
         self.actionContrastMap.setText(_translate("MainWindow", "Карта контрастности"))
         self.actionPixelInfo.setText(_translate("MainWindow", "Информация о пикселе"))
         self.actionBrightnessProfile.setText(_translate("MainWindow", "Профиль яркости"))
-        self.actionBrightnessHistogram.setText(_translate("MainWindow", "Гистограмма яркости"))
 
         self.actionSettings.setText(_translate("MainWindow", "Настройки"))
