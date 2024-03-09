@@ -41,6 +41,7 @@ class ImageAnalysis:
             print("Intensity:", np.mean(self.image[y, x]))
             print("Mean:", mean)
             print("Standard Deviation:", std_dev)
+            print("Uniformity:", np.mean(std_dev) < 1.5)
             print()
 
             cv2.rectangle(img_copy, (x - 5, y - 5), (x + 5, y + 5), (0, 255, 0), 1)
