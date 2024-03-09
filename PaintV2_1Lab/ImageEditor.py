@@ -17,9 +17,9 @@ class ImageEditor:
                 b = self._clamp(color.blue() + brightness)
 
                 # Простой способ регулировки контраста
-                r = self._clamp(((r - 127) * contrast / 100) + 127)
-                g = self._clamp(((g - 127) * contrast / 100) + 127)
-                b = self._clamp(((b - 127) * contrast / 100) + 127)
+                r = self._clamp(round(((r - 127) * contrast / 100) + 127))
+                g = self._clamp(round(((g - 127) * contrast / 100) + 127))
+                b = self._clamp(round(((b - 127) * contrast / 100) + 127))
 
                 self.image.setPixel(x, y, QColor(r, g, b).rgba())
         return self.image

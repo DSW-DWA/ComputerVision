@@ -61,10 +61,13 @@ class UiMainWindow(object):
         # Действия
         self.actionOpen = QtGui.QAction(parent=main_window)
         self.actionOpen.setObjectName("actionOpen")
-        self.actionExport = QtGui.QAction(parent=main_window)
-        self.actionExport.setObjectName("actionExport")
         self.actionSave = QtGui.QAction(parent=main_window)
         self.actionSave.setObjectName("actionSave")
+        self.actionSaveAs = QtGui.QAction(parent=main_window)
+        self.actionSaveAs.setObjectName("actionSaveAs")
+        self.actionExit = QtGui.QAction(parent=main_window)
+        self.actionExit.setObjectName("actionExit")
+
         self.actionAdjustBrightnessContrast = QtGui.QAction(parent=main_window)
         self.actionAdjustBrightnessContrast.setObjectName("actionAdjustBrightnessContrast")
         self.actionBrightnessChange = QtGui.QAction(parent=main_window)
@@ -77,10 +80,6 @@ class UiMainWindow(object):
         self.actionMirrorDisplay.setObjectName("actionMirrorDisplay")
         self.actionBrightnessHistogram = QtGui.QAction(parent=main_window)
         self.actionBrightnessHistogram.setObjectName("actionBrightnessHistogram")
-        self.actionSaveAs = QtGui.QAction(parent=main_window)
-        self.actionSaveAs.setObjectName("actionSaveAs")
-        self.actionExit = QtGui.QAction(parent=main_window)
-        self.actionExit.setObjectName("actionExit")
         self.actionInversion = QtGui.QAction(parent=main_window)
         self.actionInversion.setObjectName("actionInversion")
         self.actionColorChannelsSwap = QtGui.QAction(parent=main_window)
@@ -112,18 +111,17 @@ class UiMainWindow(object):
         self.actionSettings = QtGui.QAction(parent=main_window)
         self.actionSettings.setObjectName("actionSettings")
 
-        # Выключил все кнопки пока их не реализовали.
+        # TODO: Выключил все кнопки пока их не реализовали.
         # Реализовали - включили. Так проще будет понять.
         # self.actionOpen.setEnabled(False) Реализовано.
-        self.actionExport.setEnabled(False)
         self.actionSave.setEnabled(False)
-        self.actionAdjustBrightnessContrast.setEnabled(False)
+        self.actionSaveAs.setEnabled(False)
+        # self.actionAdjustBrightnessContrast.setEnabled(False)
         self.actionBrightnessChange.setEnabled(False)
         self.actionContrastChange.setEnabled(False)
         self.actionNegative.setEnabled(False)
         self.actionMirrorDisplay.setEnabled(False)
         self.actionBrightnessHistogram.setEnabled(False)
-        self.actionSaveAs.setEnabled(False)
         self.actionExit.setEnabled(False)
         self.actionInversion.setEnabled(False)
         self.actionColorChannelsSwap.setEnabled(False)
