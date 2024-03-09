@@ -21,6 +21,7 @@ class UiMainWindow(object):
         self.actionBlueChannel.triggered.connect(self.blueChannel)
         self.actionRegionAnalysis.triggered.connect(self.RegionAnalysis)
         self.actionContrastMap.triggered.connect(self.ContrastMapViewer)
+        self.actionBrightnessProfile.triggered.connect(self.BrightnessProfileViewer)
 
     def openImage(self):
         file_path, _ = QFileDialog.getOpenFileName(self.centralWidget, "Open Image", "", "Images (*.bmp *.png *.tiff)")
@@ -68,6 +69,11 @@ class UiMainWindow(object):
     def ContrastMapViewer(self):
         if hasattr(self, 'imageAnalysis'):
             self.imageAnalysis.ContrastMapViewer()
+
+    def BrightnessProfileViewer(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.BrightnessProfileViewer()
+
     def setupUi(self, main_window):
         main_window.setObjectName("MainWindow")
         main_window.resize(800, 600)
@@ -166,7 +172,7 @@ class UiMainWindow(object):
         self.actionRegionAnalysis.setEnabled(True)
         self.actionContrastMap.setEnabled(True)
         self.actionPixelInfo.setEnabled(False)
-        self.actionBrightnessProfile.setEnabled(False)
+        self.actionBrightnessProfile.setEnabled(True)
         self.actionSettings.setEnabled(False)
 
         # Меню

@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 from ContrastMapViewer import ContrastMapViewer
+from BrightnessProfileViewer import BrightnessProfileViewer
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication
 
@@ -16,7 +17,24 @@ class ImageAnalysis:
             img_copy = np.copy(self.image)
             roi = self.image[y - 5:y + 6, x - 5:x + 6]
 
-            mean, std_dev = cv2.meanStdDev(roi)
+            mean, std_dev = 0,[0,0,0]
+            for i in roi:
+                for j in i:
+                    mean += np.mean(j)
+            
+            mean /= 121
+
+            for k in [0,1,2]:
+                mean_ch = 0
+                for i in roi:
+                    for j in i:
+                        mean_ch += j[k]
+                
+                mean_ch /= (roi.shape[0] * roi.shape[1])
+                
+                for i in roi:
+                    for j in i:
+                        std_dev[k] = np.sqrt(np.sum((j[k] - mean_ch) ** 2) / (roi.shape[0] * roi.shape[1]))
 
             print(f"Coordinates: ({x}, {y})")
             print("RGB values:", self.image[y, x])
@@ -73,6 +91,14 @@ class ImageAnalysis:
 
     def ContrastMapViewer(self):
         dlg = ContrastMapViewer(self.image)
+        if dlg.exec():
+            print("Success!")
+        else:
+            print("Cancel!")
+
+    
+    def BrightnessProfileViewer(self):
+        dlg = BrightnessProfileViewer(self.image)
         if dlg.exec():
             print("Success!")
         else:
