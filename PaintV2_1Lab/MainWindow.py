@@ -4,15 +4,19 @@ from PyQt6.QtWidgets import QFileDialog, QLabel
 from ImageEditor import ImageEditor
 
 
-class Ui_MainWindow(object):
+class UiMainWindow(object):
+    def __init__(self):
+        self.image = None
+        self.imageEditor = None
+
     def connectSignals(self):
         self.actionOpen.triggered.connect(self.openImage)
         self.actionAdjustBrightnessContrast.triggered.connect(self.adjustBrightnessContrast)
 
     def openImage(self):
-        filePath, _ = QFileDialog.getOpenFileName(self.centralWidget, "Open Image", "", "Images (*.png *.bmp *.jpg *.jpeg *.tiff)")
-        if filePath:
-            self.image = QImage(filePath)
+        file_path, _ = QFileDialog.getOpenFileName(self.centralWidget, "Open Image", "", "Images (*.bmp *.png *.tiff)")
+        if file_path:
+            self.image = QImage(file_path)
             self.imageEditor = ImageEditor(self.image)
             self.showImage(self.imageEditor.image)
 
@@ -31,81 +35,81 @@ class Ui_MainWindow(object):
         pixmap = QPixmap.fromImage(image)
         self.imageLabel.setPixmap(pixmap.scaled(self.imageLabel.size(), QtCore.Qt.AspectRatioMode.KeepAspectRatio))
 
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
+    def setupUi(self, main_window):
+        main_window.setObjectName("MainWindow")
+        main_window.resize(800, 600)
 
         # Основные компоненты интерфейса
-        self.centralWidget = QtWidgets.QWidget(parent=MainWindow)
+        self.centralWidget = QtWidgets.QWidget(parent=main_window)
         self.centralWidget.setObjectName("centralWidget")
-        MainWindow.setCentralWidget(self.centralWidget)
+        main_window.setCentralWidget(self.centralWidget)
 
         self.imageLabel = QLabel(self.centralWidget)
         self.imageLabel.setGeometry(QtCore.QRect(10, 10, 780, 540))
         self.imageLabel.setObjectName("imageLabel")
         self.imageLabel.setScaledContents(True)
 
-        self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
+        self.statusbar = QtWidgets.QStatusBar(parent=main_window)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+        main_window.setStatusBar(self.statusbar)
 
-        self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
+        self.menubar = QtWidgets.QMenuBar(parent=main_window)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 37))
         self.menubar.setObjectName("menubar")
-        MainWindow.setMenuBar(self.menubar)
+        main_window.setMenuBar(self.menubar)
 
         # Действия
-        self.actionOpen = QtGui.QAction(parent=MainWindow)
+        self.actionOpen = QtGui.QAction(parent=main_window)
         self.actionOpen.setObjectName("actionOpen")
-        self.actionExport = QtGui.QAction(parent=MainWindow)
+        self.actionExport = QtGui.QAction(parent=main_window)
         self.actionExport.setObjectName("actionExport")
-        self.actionSave = QtGui.QAction(parent=MainWindow)
+        self.actionSave = QtGui.QAction(parent=main_window)
         self.actionSave.setObjectName("actionSave")
-        self.actionAdjustBrightnessContrast = QtGui.QAction(parent=MainWindow)
+        self.actionAdjustBrightnessContrast = QtGui.QAction(parent=main_window)
         self.actionAdjustBrightnessContrast.setObjectName("actionAdjustBrightnessContrast")
-        self.actionBrightnessChange = QtGui.QAction(parent=MainWindow)
+        self.actionBrightnessChange = QtGui.QAction(parent=main_window)
         self.actionBrightnessChange.setObjectName("actionBrightnessChange")
-        self.actionContrastChange = QtGui.QAction(parent=MainWindow)
+        self.actionContrastChange = QtGui.QAction(parent=main_window)
         self.actionContrastChange.setObjectName("actionContrastChange")
-        self.actionNegative = QtGui.QAction(parent=MainWindow)
+        self.actionNegative = QtGui.QAction(parent=main_window)
         self.actionNegative.setObjectName("actionNegative")
-        self.actionMirrorDisplay = QtGui.QAction(parent=MainWindow)
+        self.actionMirrorDisplay = QtGui.QAction(parent=main_window)
         self.actionMirrorDisplay.setObjectName("actionMirrorDisplay")
-        self.actionBrightnessHistogram = QtGui.QAction(parent=MainWindow)
+        self.actionBrightnessHistogram = QtGui.QAction(parent=main_window)
         self.actionBrightnessHistogram.setObjectName("actionBrightnessHistogram")
-        self.actionSaveAs = QtGui.QAction(parent=MainWindow)
+        self.actionSaveAs = QtGui.QAction(parent=main_window)
         self.actionSaveAs.setObjectName("actionSaveAs")
-        self.actionExit = QtGui.QAction(parent=MainWindow)
+        self.actionExit = QtGui.QAction(parent=main_window)
         self.actionExit.setObjectName("actionExit")
-        self.actionInversion = QtGui.QAction(parent=MainWindow)
+        self.actionInversion = QtGui.QAction(parent=main_window)
         self.actionInversion.setObjectName("actionInversion")
-        self.actionColorChannelsSwap = QtGui.QAction(parent=MainWindow)
+        self.actionColorChannelsSwap = QtGui.QAction(parent=main_window)
         self.actionColorChannelsSwap.setObjectName("actionColorChannelsSwap")
-        self.actionReflection = QtGui.QAction(parent=MainWindow)
+        self.actionReflection = QtGui.QAction(parent=main_window)
         self.actionReflection.setObjectName("actionReflection")
-        self.actionRotation = QtGui.QAction(parent=MainWindow)
+        self.actionRotation = QtGui.QAction(parent=main_window)
         self.actionRotation.setObjectName("actionRotation")
-        self.actionNoiseRemoval = QtGui.QAction(parent=MainWindow)
+        self.actionNoiseRemoval = QtGui.QAction(parent=main_window)
         self.actionNoiseRemoval.setObjectName("actionNoiseRemoval")
-        self.actionSharpness = QtGui.QAction(parent=MainWindow)
+        self.actionSharpness = QtGui.QAction(parent=main_window)
         self.actionSharpness.setObjectName("actionSharpness")
-        self.actionRedChannel = QtGui.QAction(parent=MainWindow)
+        self.actionRedChannel = QtGui.QAction(parent=main_window)
         self.actionRedChannel.setObjectName("actionRedChannel")
-        self.actionGreenChannel = QtGui.QAction(parent=MainWindow)
+        self.actionGreenChannel = QtGui.QAction(parent=main_window)
         self.actionGreenChannel.setObjectName("actionGreenChannel")
-        self.actionBlueChannel = QtGui.QAction(parent=MainWindow)
+        self.actionBlueChannel = QtGui.QAction(parent=main_window)
         self.actionBlueChannel.setObjectName("actionBlueChannel")
-        self.actionBlackWhite = QtGui.QAction(parent=MainWindow)
+        self.actionBlackWhite = QtGui.QAction(parent=main_window)
         self.actionBlackWhite.setObjectName("actionBlackWhite")
-        self.actionRegionAnalysis = QtGui.QAction(parent=MainWindow)
+        self.actionRegionAnalysis = QtGui.QAction(parent=main_window)
         self.actionRegionAnalysis.setObjectName("actionRegionAnalysis")
-        self.actionContrastMap = QtGui.QAction(parent=MainWindow)
+        self.actionContrastMap = QtGui.QAction(parent=main_window)
         self.actionContrastMap.setObjectName("actionContrastMap")
-        self.actionPixelInfo = QtGui.QAction(parent=MainWindow)
+        self.actionPixelInfo = QtGui.QAction(parent=main_window)
         self.actionPixelInfo.setObjectName("actionPixelInfo")
-        self.actionBrightnessProfile = QtGui.QAction(parent=MainWindow)
+        self.actionBrightnessProfile = QtGui.QAction(parent=main_window)
         self.actionBrightnessProfile.setObjectName("actionBrightnessProfile")
-        self.actionSettings = QtGui.QAction(parent=MainWindow)
+        self.actionSettings = QtGui.QAction(parent=main_window)
         self.actionSettings.setObjectName("actionSettings")
 
         # Выключил все кнопки пока их не реализовали.
@@ -186,8 +190,8 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuAnalysis.menuAction())
         self.menubar.addAction(self.menuTools.menuAction())
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi(main_window)
+        QtCore.QMetaObject.connectSlotsByName(main_window)
         self.connectSignals()
 
     def retranslateUi(self, MainWindow):
@@ -236,13 +240,3 @@ class Ui_MainWindow(object):
         self.actionBrightnessHistogram.setText(_translate("MainWindow", "Гистограмма яркости"))
 
         self.actionSettings.setText(_translate("MainWindow", "Настройки"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec())
