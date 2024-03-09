@@ -2,12 +2,13 @@ import cv2
 import numpy as np
 from BrightnessContrastDialog import BrightnessContrastDialog
 from ChannelExchangeDialog import ChannelExchangeDialog
+from ImageAnalysis import ImageAnalysis
 from ImageEditor import ImageEditor
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import QFileDialog, QLabel, QMainWindow
-from ImageAnalysis import ImageAnalysis
+
 
 class UiMainWindow(QMainWindow):
     def __init__(self):
@@ -45,7 +46,7 @@ class UiMainWindow(QMainWindow):
         self.actionSaveAs.triggered.connect(self.saveImageAs)
 
         self.actionSave.triggered.connect(self.saveImage)
-        self.actionAdjustBrightnessContrast.triggered.connect(self.adjustBrightnessContrast)
+        self.actionAdjustBrightnessContrast.triggered.connect(self.change_brightness_and_contrast)
         self.actionBlackWhite.triggered.connect(self.blackWhite)
         self.actionRedChannel.triggered.connect(self.redChannel)
         self.actionGreenChannel.triggered.connect(self.greenChannel)
@@ -71,7 +72,7 @@ class UiMainWindow(QMainWindow):
             self.imageEditor = ImageEditor(self.image)
             self.showImage(self.imageEditor.change_image)
             self.imageAnalysis = ImageAnalysis(cv2.imread(file_path))
-            self.showImage(self.imageEditor.image)
+            self.showImage(self.imageEditor.getImage())
 
             self.actionAdjustBrightnessContrast.setEnabled(True)
             self.actionInversion.setEnabled(True)
