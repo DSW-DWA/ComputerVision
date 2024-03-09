@@ -1,12 +1,12 @@
+import cv2
 import numpy as np
+from BrightnessContrastDialog import BrightnessContrastDialog
+from ChannelExchangeDialog import ChannelExchangeDialog
+from ImageEditor import ImageEditor
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QImage, QPixmap
-from PyQt6.QtWidgets import QMainWindow, QLabel, QFileDialog
-
-from BrightnessContrastDialog import BrightnessContrastDialog
-from ImageEditor import ImageEditor
-import cv2
+from PyQt6.QtWidgets import QFileDialog, QLabel, QMainWindow
 
 
 class UiMainWindow(QMainWindow):
@@ -14,32 +14,69 @@ class UiMainWindow(QMainWindow):
         super().__init__()
         self.imageLabel = QLabel(self)
         self.image = None
-        self.imageEditor = None
+        self.imageEditor: ImageEditor
         self.brightnessContrastDialog = BrightnessContrastDialog(self)
+        self.channelExchangeDialog = ChannelExchangeDialog(self)
         self.setupUi(self)
         self.connectSignals()
 
     def connectSignals(self):
         self.actionOpen.triggered.connect(self.openImage)
         self.actionAdjustBrightnessContrast.triggered.connect(lambda: self.brightnessContrastDialog.show())
-        self.brightnessContrastDialog.brightnessChanged.connect(self.updateImage)
-        self.brightnessContrastDialog.contrastChanged.connect(self.updateImage)
+        self.actionAdjustBrightnessContrast.triggered.connect(lambda: self.brightnessContrastDialog.show())
+        self.actionInversion.triggered.connect(self.inversion)
+        self.actionColorChannelsSwap.triggered.connect(lambda: self.channelExchangeDialog.show())
+        self.channelExchangeDialog.channelChanged.connect(self.swap_channels)
+        self.brightnessContrastDialog.brightnessChanged.connect(self.change_brightness_and_contrast)
+        self.brightnessContrastDialog.channelChanged.connect(self.change_brightness_and_contrast)
+        self.brightnessContrastDialog.contrastChanged.connect(self.change_brightness_and_contrast)
+        self.brightnessContrastDialog.okButton.clicked.connect(self.onOkButtonClicked)
+        self.brightnessContrastDialog.cancelButton.clicked.connect(self.onCancelButtonClicked)
+
+    def onOkButtonClicked(self):
+        if self.imageEditor:
+            self.imageEditor.save()
+            self.showImage(self.imageEditor.save_image)
+
+    def onCancelButtonClicked(self):
+        if self.imageEditor:
+            self.imageEditor.cancel()
+            self.showImage(self.imageEditor.save_image)
 
     def openImage(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "Images (*.jpg *.jpeg *.png *.bmp *.tiff)")
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "Images (*.png *.bmp *.tiff)")
         if file_path:
             self.image = cv2.imread(file_path)
             self.imageEditor = ImageEditor(self.image)
-            self.showImage(self.imageEditor.image)
+            self.showImage(self.imageEditor.change_image)
+            self.actionAdjustBrightnessContrast.setEnabled(True)
+            self.actionInversion.setEnabled(True)
+            self.actionColorChannelsSwap.setEnabled(True)
 
-    def updateImage(self):
+    def change_brightness_and_contrast(self):
         if self.imageEditor:
             brightness = self.brightnessContrastDialog.brightnessSlider.value()
             contrast = self.brightnessContrastDialog.contrastSlider.value()
-            adjustedImage = self.imageEditor.adjustBrightnessContrast(brightness, contrast)
-            self.showImage(adjustedImage)
+            channel = self.brightnessContrastDialog.getActiveRadioButton()
+            self.imageEditor.change_channel_intensity_and_cantrast(
+                channel=channel,
+                brightness_factor=brightness,
+                contrast_factor=contrast,
+            )
+            self.showImage(self.imageEditor.getImage())
 
-    def showImage(self, image):
+    def inversion(self):
+        if self.imageEditor:
+            self.imageEditor.invert_image()
+            self.showImage(self.imageEditor.getImage())
+
+    def swap_channels(self, source, destination):
+        if self.imageEditor:
+            print(source, destination)
+            self.imageEditor.swap_channels(source, destination)
+            self.showImage(self.imageEditor.getImage())
+
+    def showImage(self, image: np.ndarray):
         height, width, channels = image.shape
         bytesPerLine = channels * width
         qImg = QImage(image.data, width, height, bytesPerLine, QImage.Format.Format_RGB888).rgbSwapped()
@@ -127,7 +164,7 @@ class UiMainWindow(QMainWindow):
         # self.actionOpen.setEnabled(False) Реализовано.
         self.actionSave.setEnabled(False)
         self.actionSaveAs.setEnabled(False)
-        # self.actionAdjustBrightnessContrast.setEnabled(False)
+        self.actionAdjustBrightnessContrast.setEnabled(False)
         self.actionBrightnessChange.setEnabled(False)
         self.actionContrastChange.setEnabled(False)
         self.actionNegative.setEnabled(False)
