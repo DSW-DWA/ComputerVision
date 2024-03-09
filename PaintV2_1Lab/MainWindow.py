@@ -14,6 +14,7 @@ class UiMainWindow(QMainWindow):
         super().__init__()
         self.imageLabel = QLabel(self)
         self.image = None
+        self.currentFilePath = None
         self.imageEditor: ImageEditor
         self.brightnessContrastDialog = BrightnessContrastDialog(self)
         self.channelExchangeDialog = ChannelExchangeDialog(self)
@@ -33,6 +34,18 @@ class UiMainWindow(QMainWindow):
         self.brightnessContrastDialog.okButton.clicked.connect(self.onOkButtonClicked)
         self.brightnessContrastDialog.cancelButton.clicked.connect(self.onCancelButtonClicked)
 
+        self.actionFlipVertical.triggered.connect(self.flip_image_vertical)
+        self.actionFlipHorizontal.triggered.connect(self.flip_image_horizontal)
+
+        self.actionNoiseRemoval.triggered.connect(self.blur_image)
+        self.actionMozaik.triggered.connect(self.create_mosaic)
+
+        self.actionReset.triggered.connect(self.reset)
+
+        self.actionSaveAs.triggered.connect(self.saveImageAs)
+
+        self.actionSave.triggered.connect(self.saveImage)
+
     def onOkButtonClicked(self):
         if self.imageEditor:
             self.imageEditor.save()
@@ -49,9 +62,38 @@ class UiMainWindow(QMainWindow):
             self.image = cv2.imread(file_path)
             self.imageEditor = ImageEditor(self.image)
             self.showImage(self.imageEditor.change_image)
+
             self.actionAdjustBrightnessContrast.setEnabled(True)
             self.actionInversion.setEnabled(True)
             self.actionColorChannelsSwap.setEnabled(True)
+            self.actionFlipHorizontal.setEnabled(True)
+            self.actionFlipVertical.setEnabled(True)
+            self.actionNoiseRemoval.setEnabled(True)
+            self.actionMozaik.setEnabled(True)
+            self.actionReset.setEnabled(True)
+            self.actionSave.setEnabled(True)
+            self.actionSaveAs.setEnabled(True)
+
+    def saveImageAs(self):
+        if self.imageEditor and self.imageEditor.getImage() is not None:
+            filePath, _ = QFileDialog.getSaveFileName(
+                self, "Save Image", "", "Images (*.png *.jpg *.jpeg *.bmp *.tiff)"
+            )
+            if filePath:
+                cv2.imwrite(filePath, self.imageEditor.getImage())
+                self.currentFilePath = filePath
+                self.actionSave.setEnabled(True)
+
+    def saveImage(self):
+        if (
+            self.imageEditor
+            and self.imageEditor.getImage() is not None
+            and hasattr(self, 'currentFilePath')
+            and self.currentFilePath
+        ):
+            cv2.imwrite(self.currentFilePath, self.imageEditor.getImage())
+        else:
+            self.saveImageAs()  # Если путь не установлен, вызываем "сохранить как"
 
     def change_brightness_and_contrast(self):
         if self.imageEditor:
@@ -72,8 +114,32 @@ class UiMainWindow(QMainWindow):
 
     def swap_channels(self, source, destination):
         if self.imageEditor:
-            print(source, destination)
             self.imageEditor.swap_channels(source, destination)
+            self.showImage(self.imageEditor.getImage())
+
+    def flip_image_vertical(self):
+        if self.imageEditor:
+            self.imageEditor.flip_image(1)
+            self.showImage(self.imageEditor.getImage())
+
+    def flip_image_horizontal(self):
+        if self.imageEditor:
+            self.imageEditor.flip_image(0)
+            self.showImage(self.imageEditor.getImage())
+
+    def blur_image(self):
+        if self.imageEditor:
+            self.imageEditor.blur_image(5)
+            self.showImage(self.imageEditor.getImage())
+
+    def create_mosaic(self):
+        if self.imageEditor:
+            self.imageEditor.create_mosaic(5)
+            self.showImage(self.imageEditor.getImage())
+
+    def reset(self):
+        if self.imageEditor:
+            self.imageEditor.reset()
             self.showImage(self.imageEditor.getImage())
 
     def showImage(self, image: np.ndarray):
@@ -81,7 +147,8 @@ class UiMainWindow(QMainWindow):
         bytesPerLine = channels * width
         qImg = QImage(image.data, width, height, bytesPerLine, QImage.Format.Format_RGB888).rgbSwapped()
         pixmap = QPixmap.fromImage(qImg)
-        self.imageLabel.setPixmap(pixmap.scaled(self.imageLabel.size(), Qt.AspectRatioMode.KeepAspectRatio))
+        self.imageLabel.setPixmap(pixmap)
+        self.imageLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     def setupUi(self, main_window):
         main_window.setObjectName("MainWindow")
@@ -115,6 +182,8 @@ class UiMainWindow(QMainWindow):
         self.actionSaveAs.setObjectName("actionSaveAs")
         self.actionExit = QtGui.QAction(parent=main_window)
         self.actionExit.setObjectName("actionExit")
+        self.actionReset = QtGui.QAction(parent=main_window)
+        self.actionReset.setObjectName("actionReset")
 
         self.actionAdjustBrightnessContrast = QtGui.QAction(parent=main_window)
         self.actionAdjustBrightnessContrast.setObjectName("actionAdjustBrightnessContrast")
@@ -132,14 +201,14 @@ class UiMainWindow(QMainWindow):
         self.actionInversion.setObjectName("actionInversion")
         self.actionColorChannelsSwap = QtGui.QAction(parent=main_window)
         self.actionColorChannelsSwap.setObjectName("actionColorChannelsSwap")
-        self.actionReflection = QtGui.QAction(parent=main_window)
-        self.actionReflection.setObjectName("actionReflection")
-        self.actionRotation = QtGui.QAction(parent=main_window)
-        self.actionRotation.setObjectName("actionRotation")
+        self.actionFlipVertical = QtGui.QAction(parent=main_window)
+        self.actionFlipVertical.setObjectName("actionFlip")
+        self.actionFlipHorizontal = QtGui.QAction(parent=main_window)
+        self.actionFlipHorizontal.setObjectName("actionRotation")
         self.actionNoiseRemoval = QtGui.QAction(parent=main_window)
         self.actionNoiseRemoval.setObjectName("actionNoiseRemoval")
-        self.actionSharpness = QtGui.QAction(parent=main_window)
-        self.actionSharpness.setObjectName("actionSharpness")
+        self.actionMozaik = QtGui.QAction(parent=main_window)
+        self.actionMozaik.setObjectName("actionSharpness")
         self.actionRedChannel = QtGui.QAction(parent=main_window)
         self.actionRedChannel.setObjectName("actionRedChannel")
         self.actionGreenChannel = QtGui.QAction(parent=main_window)
@@ -159,24 +228,23 @@ class UiMainWindow(QMainWindow):
         self.actionSettings = QtGui.QAction(parent=main_window)
         self.actionSettings.setObjectName("actionSettings")
 
-        # TODO: Выключил все кнопки пока их не реализовали.
-        # Реализовали - включили. Так проще будет понять.
-        # self.actionOpen.setEnabled(False) Реализовано.
+        self.actionOpen.setEnabled(True)
         self.actionSave.setEnabled(False)
         self.actionSaveAs.setEnabled(False)
+        self.actionReset.setEnabled(False)
+        self.actionExit.setEnabled(False)
         self.actionAdjustBrightnessContrast.setEnabled(False)
         self.actionBrightnessChange.setEnabled(False)
         self.actionContrastChange.setEnabled(False)
         self.actionNegative.setEnabled(False)
         self.actionMirrorDisplay.setEnabled(False)
         self.actionBrightnessHistogram.setEnabled(False)
-        self.actionExit.setEnabled(False)
         self.actionInversion.setEnabled(False)
         self.actionColorChannelsSwap.setEnabled(False)
-        self.actionReflection.setEnabled(False)
-        self.actionRotation.setEnabled(False)
+        self.actionFlipVertical.setEnabled(False)
+        self.actionFlipHorizontal.setEnabled(False)
         self.actionNoiseRemoval.setEnabled(False)
-        self.actionSharpness.setEnabled(False)
+        self.actionMozaik.setEnabled(False)
         self.actionRedChannel.setEnabled(False)
         self.actionGreenChannel.setEnabled(False)
         self.actionBlueChannel.setEnabled(False)
@@ -210,12 +278,13 @@ class UiMainWindow(QMainWindow):
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionSaveAs)
         self.menuFile.addAction(self.actionExit)
+        self.menuFile.addAction(self.actionReset)
         self.menuColorCorrection.addAction(self.actionInversion)
         self.menuColorCorrection.addAction(self.actionColorChannelsSwap)
-        self.menuTransformations.addAction(self.actionReflection)
-        self.menuTransformations.addAction(self.actionRotation)
+        self.menuTransformations.addAction(self.actionFlipVertical)
+        self.menuTransformations.addAction(self.actionFlipHorizontal)
         self.menuFilters.addAction(self.actionNoiseRemoval)
-        self.menuFilters.addAction(self.actionSharpness)
+        self.menuFilters.addAction(self.actionMozaik)
         self.menuEdit.addAction(self.actionAdjustBrightnessContrast)
         self.menuEdit.addAction(self.menuColorCorrection.menuAction())
         self.menuEdit.addAction(self.menuTransformations.menuAction())
@@ -258,6 +327,7 @@ class UiMainWindow(QMainWindow):
         self.actionOpen.setText(_translate("MainWindow", "Открыть"))
         self.actionSave.setText(_translate("MainWindow", "Сохранить"))
         self.actionSaveAs.setText(_translate("MainWindow", "Сохранить как"))
+        self.actionReset.setText(_translate("MainWindow", "Сбросить"))
         self.actionExit.setText(_translate("MainWindow", "Выход"))
 
         self.actionAdjustBrightnessContrast.setText(_translate("MainWindow", "Яркость/Контрастность"))
@@ -268,11 +338,11 @@ class UiMainWindow(QMainWindow):
 
         self.actionInversion.setText(_translate("MainWindow", "Инверсия"))
         self.actionColorChannelsSwap.setText(_translate("MainWindow", "Обмен цветовых каналов"))
-        self.actionReflection.setText(_translate("MainWindow", "Отражение"))
-        self.actionRotation.setText(_translate("MainWindow", "Поворот"))
+        self.actionFlipVertical.setText(_translate("MainWindow", "Отражение по вертикали"))
+        self.actionFlipHorizontal.setText(_translate("MainWindow", "Отражение по горизонтали"))
 
         self.actionNoiseRemoval.setText(_translate("MainWindow", "Удаление шума"))
-        self.actionSharpness.setText(_translate("MainWindow", "Острота"))
+        self.actionMozaik.setText(_translate("MainWindow", "Мозайка"))
 
         self.actionRedChannel.setText(_translate("MainWindow", "Красный"))
         self.actionGreenChannel.setText(_translate("MainWindow", "Зеленый"))

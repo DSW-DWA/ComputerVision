@@ -12,6 +12,10 @@ class ImageEditor:
     def getImage(self):
         return self.change_image
 
+    def reset(self):
+        self.change_image = np.copy(self.original_image)
+        self.temp_change_image = np.copy(self.original_image)
+
     def save(self):
         self.save_image = self.change_image
 
@@ -63,26 +67,26 @@ class ImageEditor:
         """
         Отражение изображения.
         """
-        self.change_image = cv2.flip(self.original_image, flip_code)
+        self.change_image = cv2.flip(self.change_image, flip_code)
         return self.change_image
 
     def blur_image(self, kernel_size):
         """
         Размытие изображения.
         """
-        self.change_image = cv2.blur(self.original_image, (kernel_size, kernel_size))
+        self.change_image = cv2.blur(self.change_image, (kernel_size, kernel_size))
         return self.change_image
 
     def create_mosaic(self, block_size):
         """
         Создает мозаику на изображении.
         """
-        height, width = self.original_image.shape[:2]
-        mosaic_image = self.original_image.copy()
+        height, width = self.change_image.shape[:2]
+        mosaic_image = self.change_image.copy()
 
         for y in range(0, height, block_size):
             for x in range(0, width, block_size):
-                block = self.original_image[y : y + block_size, x : x + block_size]
+                block = self.change_image[y : y + block_size, x : x + block_size]
                 mean_color = np.mean(block, axis=(0, 1)).astype(int)
                 mosaic_image[y : y + block_size, x : x + block_size] = mean_color
 

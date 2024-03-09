@@ -1,5 +1,6 @@
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (
+    QButtonGroup,
     QDialog,
     QHBoxLayout,
     QLabel,
@@ -10,83 +11,88 @@ from PyQt6.QtWidgets import (
 
 
 class ChannelExchangeDialog(QDialog):
-    channelChanged = pyqtSignal(str, str)
+    channelChanged = pyqtSignal(str, str)  # Signal to emit channel changes
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Color Channel Swap")
+        self.setWindowTitle("Color Channel Exchange")
 
         self.initUI()
         self.setupConnections()
 
     def initUI(self):
-        # Radio Buttons for Source Color Channel
         self.sourceLabel = QLabel("Source Channel:")
-        self.blueRadioButton = QRadioButton("Blue")
-        self.redRadioButton = QRadioButton("Red")
-        self.greenRadioButton = QRadioButton("Green")
-        self.blueRadioButton.setChecked(True)  # Setting Blue as default
-
-        # Radio Buttons for Destination Color Channel
         self.destinationLabel = QLabel("Destination Channel:")
-        self.blueDestRadioButton = QRadioButton("Blue")
-        self.redDestRadioButton = QRadioButton("Red")
-        self.greenDestRadioButton = QRadioButton("Green")
-        self.greenDestRadioButton.setChecked(True)  # Setting Green as default
 
-        # Кнопки
+        self.redRadioButtonSource = QRadioButton("Red")
+        self.greenRadioButtonSource = QRadioButton("Green")
+        self.blueRadioButtonSource = QRadioButton("Blue")
+
+        self.redRadioButtonDestination = QRadioButton("Red")
+        self.greenRadioButtonDestination = QRadioButton("Green")
+        self.blueRadioButtonDestination = QRadioButton("Blue")
+
+        self.redRadioButtonSource.setChecked(True)  # Setting Red as default for source
+        self.redRadioButtonDestination.setChecked(True)  # Setting Red as default for destination
+
+        sourceLayout = QVBoxLayout()
+        sourceLayout.addWidget(self.sourceLabel)
+        sourceLayout.addWidget(self.redRadioButtonSource)
+        sourceLayout.addWidget(self.greenRadioButtonSource)
+        sourceLayout.addWidget(self.blueRadioButtonSource)
+
+        destinationLayout = QVBoxLayout()
+        destinationLayout.addWidget(self.destinationLabel)
+        destinationLayout.addWidget(self.redRadioButtonDestination)
+        destinationLayout.addWidget(self.greenRadioButtonDestination)
+        destinationLayout.addWidget(self.blueRadioButtonDestination)
+
+        buttonLayout = QHBoxLayout()
         self.okButton = QPushButton("OK")
         self.cancelButton = QPushButton("Cancel")
+        buttonLayout.addWidget(self.okButton)
+        buttonLayout.addWidget(self.cancelButton)
 
-        layout = QVBoxLayout()
-        layout.addWidget(self.sourceLabel)
-        layout.addWidget(self.blueRadioButton)
-        layout.addWidget(self.redRadioButton)
-        layout.addWidget(self.greenRadioButton)
+        mainLayout = QHBoxLayout()
+        mainLayout.addLayout(sourceLayout)
+        mainLayout.addLayout(destinationLayout)
+        mainLayout.addLayout(buttonLayout)
 
-        layout.addWidget(self.destinationLabel)
-        layout.addWidget(self.blueDestRadioButton)
-        layout.addWidget(self.redDestRadioButton)
-        layout.addWidget(self.greenDestRadioButton)
-
-        buttonsLayout = QHBoxLayout()
-        buttonsLayout.addWidget(self.okButton)
-        buttonsLayout.addWidget(self.cancelButton)
-
-        layout.addLayout(buttonsLayout)
-        self.setLayout(layout)
+        self.setLayout(mainLayout)
 
     def setupConnections(self):
-        # Connect radio buttons to signal
-        self.blueRadioButton.toggled.connect(
-            lambda: (
-                self.channelChanged.emit("Blue", self.getDestinationChannel())
-                if self.blueRadioButton.isChecked()
-                else None
-            )
-        )
-        self.redRadioButton.toggled.connect(
-            lambda: (
-                self.channelChanged.emit("Red", self.getDestinationChannel())
-                if self.redRadioButton.isChecked()
-                else None
-            )
-        )
-        self.greenRadioButton.toggled.connect(
-            lambda: (
-                self.channelChanged.emit("Green", self.getDestinationChannel())
-                if self.greenRadioButton.isChecked()
-                else None
-            )
-        )
-
         self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
 
-    def getDestinationChannel(self):
-        if self.blueDestRadioButton.isChecked():
-            return "Blue"
-        elif self.redDestRadioButton.isChecked():
-            return "Red"
-        elif self.greenDestRadioButton.isChecked():
-            return "Green"
+        source_group = QButtonGroup(self)
+        source_group.addButton(self.redRadioButtonSource)
+        source_group.addButton(self.greenRadioButtonSource)
+        source_group.addButton(self.blueRadioButtonSource)
+
+        destination_group = QButtonGroup(self)
+        destination_group.addButton(self.redRadioButtonDestination)
+        destination_group.addButton(self.greenRadioButtonDestination)
+        destination_group.addButton(self.blueRadioButtonDestination)
+
+        source_group.buttonToggled.connect(self.emitChannelChange)
+        destination_group.buttonToggled.connect(self.emitChannelChange)
+
+    def emitChannelChange(self):
+        source_channel = ""
+        destination_channel = ""
+
+        if self.redRadioButtonSource.isChecked():
+            source_channel = "Red"
+        elif self.greenRadioButtonSource.isChecked():
+            source_channel = "Green"
+        elif self.blueRadioButtonSource.isChecked():
+            source_channel = "Blue"
+
+        if self.redRadioButtonDestination.isChecked():
+            destination_channel = "Red"
+        elif self.greenRadioButtonDestination.isChecked():
+            destination_channel = "Green"
+        elif self.blueRadioButtonDestination.isChecked():
+            destination_channel = "Blue"
+
+        self.channelChanged.emit(source_channel, destination_channel)
