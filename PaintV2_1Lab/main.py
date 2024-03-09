@@ -5,10 +5,10 @@ import sys
 
 def main():
     app = QApplication(sys.argv)
-    main_window_ = QMainWindow()
+    main_window = QMainWindow()
     ui = Ui_MainWindow()
-    ui.setupUi(main_window_)
-    main_window_.show()
+    ui.setupUi(main_window)
+    main_window.show()
     sys.exit(app.exec())
 
 
