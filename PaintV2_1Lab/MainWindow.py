@@ -2,6 +2,9 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtGui import QPixmap, QImage
 from PyQt6.QtWidgets import QFileDialog, QLabel
 from ImageEditor import ImageEditor
+from ImageAnalysis import ImageAnalysis
+import cv2
+import numpy as np
 
 
 class UiMainWindow(object):
@@ -12,12 +15,19 @@ class UiMainWindow(object):
     def connectSignals(self):
         self.actionOpen.triggered.connect(self.openImage)
         self.actionAdjustBrightnessContrast.triggered.connect(self.adjustBrightnessContrast)
+        self.actionBlackWhite.triggered.connect(self.blackWhite)
+        self.actionRedChannel.triggered.connect(self.redChannel)
+        self.actionGreenChannel.triggered.connect(self.greenChannel)
+        self.actionBlueChannel.triggered.connect(self.blueChannel)
+        self.actionRegionAnalysis.triggered.connect(self.RegionAnalysis)
+        self.actionContrastMap.triggered.connect(self.ContrastMapViewer)
 
     def openImage(self):
         file_path, _ = QFileDialog.getOpenFileName(self.centralWidget, "Open Image", "", "Images (*.bmp *.png *.tiff)")
         if file_path:
             self.image = QImage(file_path)
             self.imageEditor = ImageEditor(self.image)
+            self.imageAnalysis = ImageAnalysis(cv2.imread(file_path))
             self.showImage(self.imageEditor.image)
 
     def adjustBrightnessContrast(self):
@@ -35,6 +45,29 @@ class UiMainWindow(object):
         pixmap = QPixmap.fromImage(image)
         self.imageLabel.setPixmap(pixmap.scaled(self.imageLabel.size(), QtCore.Qt.AspectRatioMode.KeepAspectRatio))
 
+    def blackWhite(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.blackWhite()
+
+    def redChannel(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.redChannel()
+
+    def greenChannel(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.greenChannel()
+
+    def blueChannel(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.blueChannel()
+
+    def RegionAnalysis(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.RegionAnalysis()
+
+    def ContrastMapViewer(self):
+        if hasattr(self, 'imageAnalysis'):
+            self.imageAnalysis.ContrastMapViewer()
     def setupUi(self, main_window):
         main_window.setObjectName("MainWindow")
         main_window.resize(800, 600)
@@ -78,8 +111,6 @@ class UiMainWindow(object):
         self.actionNegative.setObjectName("actionNegative")
         self.actionMirrorDisplay = QtGui.QAction(parent=main_window)
         self.actionMirrorDisplay.setObjectName("actionMirrorDisplay")
-        self.actionBrightnessHistogram = QtGui.QAction(parent=main_window)
-        self.actionBrightnessHistogram.setObjectName("actionBrightnessHistogram")
         self.actionInversion = QtGui.QAction(parent=main_window)
         self.actionInversion.setObjectName("actionInversion")
         self.actionColorChannelsSwap = QtGui.QAction(parent=main_window)
@@ -121,7 +152,6 @@ class UiMainWindow(object):
         self.actionContrastChange.setEnabled(False)
         self.actionNegative.setEnabled(False)
         self.actionMirrorDisplay.setEnabled(False)
-        self.actionBrightnessHistogram.setEnabled(False)
         self.actionExit.setEnabled(False)
         self.actionInversion.setEnabled(False)
         self.actionColorChannelsSwap.setEnabled(False)
@@ -129,12 +159,12 @@ class UiMainWindow(object):
         self.actionRotation.setEnabled(False)
         self.actionNoiseRemoval.setEnabled(False)
         self.actionSharpness.setEnabled(False)
-        self.actionRedChannel.setEnabled(False)
-        self.actionGreenChannel.setEnabled(False)
-        self.actionBlueChannel.setEnabled(False)
-        self.actionBlackWhite.setEnabled(False)
-        self.actionRegionAnalysis.setEnabled(False)
-        self.actionContrastMap.setEnabled(False)
+        self.actionRedChannel.setEnabled(True)
+        self.actionGreenChannel.setEnabled(True)
+        self.actionBlueChannel.setEnabled(True)
+        self.actionBlackWhite.setEnabled(True)
+        self.actionRegionAnalysis.setEnabled(True)
+        self.actionContrastMap.setEnabled(True)
         self.actionPixelInfo.setEnabled(False)
         self.actionBrightnessProfile.setEnabled(False)
         self.actionSettings.setEnabled(False)
@@ -175,7 +205,6 @@ class UiMainWindow(object):
         self.menuColorChannels.addAction(self.actionRedChannel)
         self.menuColorChannels.addAction(self.actionGreenChannel)
         self.menuColorChannels.addAction(self.actionBlueChannel)
-        self.menuAnalysis.addAction(self.actionBrightnessHistogram)
         self.menuAnalysis.addAction(self.menuColorChannels.menuAction())
         self.menuAnalysis.addAction(self.actionBlackWhite)
         self.menuAnalysis.addAction(self.actionRegionAnalysis)
@@ -235,6 +264,5 @@ class UiMainWindow(object):
         self.actionContrastMap.setText(_translate("MainWindow", "Карта контрастности"))
         self.actionPixelInfo.setText(_translate("MainWindow", "Информация о пикселе"))
         self.actionBrightnessProfile.setText(_translate("MainWindow", "Профиль яркости"))
-        self.actionBrightnessHistogram.setText(_translate("MainWindow", "Гистограмма яркости"))
 
         self.actionSettings.setText(_translate("MainWindow", "Настройки"))
