@@ -39,21 +39,16 @@ class BrightnessProfileViewer(QDialog):
         self.canvas = FigureCanvas(self.figure)
         self.layout.addWidget(self.canvas)
 
-        self.image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        self.image = self.custom_cvtColor(image)
         self.update_image()
 
         self.show_hist_button = QPushButton("Show hist")
         self.show_hist_button.clicked.connect(self.update_brightness_profile)
         self.layout.addWidget(self.show_hist_button)
 
-    # def load_image(self):
-    #     self.image = cv2.imread("image.png", cv2.IMREAD_GRAYSCALE)
-    #     self.update_image()
-
     def update_image(self):
         height, width= self.image.shape
         bytes_per_line = width
-        cv2.line(self.image, (0, self.profile_slider.value()), (width, self.profile_slider.value()), (255, 255, 255), 1)
         q_img = QImage(self.image.data, width, height, bytes_per_line, QImage.Format.Format_Grayscale8)
         pixmap = QPixmap.fromImage(q_img)
         pixmap = pixmap.scaledToWidth(400)
@@ -67,16 +62,8 @@ class BrightnessProfileViewer(QDialog):
         profile = self.image[self.profile_slider.value(),:]
         ax.plot(profile, color='b')
         self.canvas.draw()
-        # plt.xlabel('Pixel')
-        # plt.ylabel('Brightness')
-        # plt.title('Brightness Profile')
-        # plt.grid(True)
-        # plt.xlim([0, 256])
-        # plt.show()
 
-
-# if __name__ == "__main__":
-#     app = QApplication(sys.argv)
-#     window = BrightnessProfileViewer()
-#     window.show()
-#     sys.exit(app.exec())
+    def custom_cvtColor(self, image):
+        gray_weights = np.array([0.114, 0.587, 0.299])
+        gray_image = np.dot(image[..., :3], gray_weights)
+        return gray_image.astype(np.uint8)

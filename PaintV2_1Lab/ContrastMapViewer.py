@@ -30,7 +30,7 @@ class ContrastMapViewer(QDialog):
         self.contrast_map_label = QLabel()
         self.layout.addWidget(self.contrast_map_label)
 
-        self.image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        self.image = self.custom_cvtColor(image)
 
         # Custom Window parameters
         self.custom_window_width_label = QLabel("Custom neighbors:")
@@ -95,7 +95,7 @@ class ContrastMapViewer(QDialog):
         else:
             return
 
-        cv2.normalize(contrast_map, contrast_map, 0, 255, cv2.NORM_MINMAX)
+        self.custom_normalize(contrast_map, contrast_map, 0, 255)
         contrast_map = contrast_map.astype(np.uint8)
 
         height, width = contrast_map.shape
@@ -106,7 +106,7 @@ class ContrastMapViewer(QDialog):
         self.contrast_map_label.setPixmap(pixmap)
 
 
-        cv2.normalize(contrast_map, contrast_map, 0, 255, cv2.NORM_MINMAX)
+        self.custom_normalize(contrast_map, contrast_map, 0, 255)
         contrast_map = contrast_map.astype(np.uint8)
 
         height, width = contrast_map.shape
@@ -115,3 +115,15 @@ class ContrastMapViewer(QDialog):
         pixmap = QPixmap.fromImage(q_img)
         pixmap = pixmap.scaledToWidth(400)
         self.contrast_map_label.setPixmap(pixmap)
+
+    def custom_normalize(self, src, dst, alpha, beta):
+        src_min = np.min(src)
+        src_max = np.max(src)
+        src_range = src_max - src_min
+        dst_range = beta - alpha
+        dst[:] = (src - src_min) * (dst_range / src_range) + alpha
+    
+    def custom_cvtColor(self, image):
+        gray_weights = np.array([0.114, 0.587, 0.299])
+        gray_image = np.dot(image[..., :3], gray_weights)
+        return gray_image.astype(np.uint8)

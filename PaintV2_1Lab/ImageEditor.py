@@ -30,11 +30,11 @@ class ImageEditor:
         contrast_factor = np.interp(contrast_factor, [-100, 100], [0.5, 2.0])
         b, g, r = cv2.split(self.original_image)
         if channel == 'r':
-            r = cv2.convertScaleAbs(r, beta=brightness_factor, alpha=contrast_factor)
+            r = self.custom_convertScaleAbs(r, brightness_factor, contrast_factor)
         elif channel == 'g':
-            g = cv2.convertScaleAbs(g, beta=brightness_factor, alpha=contrast_factor)
+            g = self.custom_convertScaleAbs(g, brightness_factor, contrast_factor)
         elif channel == 'b':
-            b = cv2.convertScaleAbs(b, beta=brightness_factor, alpha=contrast_factor)
+            b = self.custom_convertScaleAbs(b, brightness_factor, contrast_factor)
 
         self.change_image = cv2.merge((b, g, r))
 
@@ -42,7 +42,13 @@ class ImageEditor:
         """
         Получение негатива изображения.
         """
-        self.change_image = cv2.bitwise_not(self.change_image)
+        self.change_image = self.custom_bitwise_not(self.change_image)
+
+    def custom_bitwise_not(self, image):
+        max_value = np.iinfo(image.dtype).max
+        inverted_image = max_value - image
+        return inverted_image
+
 
     def swap_channels(self, channel1, channel2):
         """
@@ -67,15 +73,49 @@ class ImageEditor:
         """
         Отражение изображения.
         """
-        self.change_image = cv2.flip(self.change_image, flip_code)
+        self.change_image =self.custom_flip_image(self.change_image, flip_code)
         return self.change_image
+    
+    def custom_flip_image(self, image, flip_code):
+        height, width = image.shape[:2]
+        flipped_image = np.zeros_like(image)
+
+        if flip_code == 0:
+            for y in range(height):
+                flipped_image[y, :] = image[height - y - 1, :]
+        elif flip_code == 1:
+            for x in range(width):
+                flipped_image[:, x] = image[:, width - x - 1]
+        elif flip_code == -1:
+            for y in range(height):
+                flipped_image[y, :] = image[height - y - 1, ::-1]
+
+        return flipped_image
 
     def blur_image(self, kernel_size):
         """
         Размытие изображения.
         """
-        self.change_image = cv2.blur(self.change_image, (kernel_size, kernel_size))
+        self.change_image = self.custom_blur_image(self.change_image, kernel_size)
         return self.change_image
+
+    def custom_blur_image(self, image, kernel_size):
+        height, width = image.shape[:2]
+        blurred_image = np.zeros_like(image)
+
+        for c in range(image.shape[2]):
+            for y in range(height):
+                for x in range(width):
+                    total = 0
+                    count = 0
+                    for j in range(-kernel_size//2, kernel_size//2 + 1):
+                        for i in range(-kernel_size//2, kernel_size//2 + 1):
+                            if (0 <= x + i < width) and (0 <= y + j < height):
+                                total += image[y + j, x + i, c]
+                                count += 1
+                    blurred_image[y, x, c] = total // count
+
+        return blurred_image
 
     def create_mosaic(self, block_size):
         """
@@ -92,3 +132,9 @@ class ImageEditor:
 
         self.change_image = mosaic_image
         return self.change_image
+
+    def custom_convertScaleAbs(self, src, brightness_factor, contrast_factor):
+        scaled_src = src.astype(np.float32) * contrast_factor + brightness_factor
+        scaled_src = np.clip(scaled_src, 0, 255)
+        dst = scaled_src.astype(np.uint8)
+        return dst

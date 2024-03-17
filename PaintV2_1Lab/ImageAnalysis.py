@@ -48,7 +48,7 @@ class ImageAnalysis:
             cv2.imshow('Color Image', img_copy)
 
     def blackWhite(self):
-        gray_image = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        gray_image = self.custom_cvtColor(self.image)
         hist = cv2.calcHist([gray_image], [0], None, [256], [0, 256])
         cv2.imshow('Gray Image', gray_image)
 
@@ -58,7 +58,7 @@ class ImageAnalysis:
     
     def redChannel(self):
         b, g, r = cv2.split(self.image)
-        hist = cv2.calcHist([r], [0], None, [256], [0, 256])
+        hist = self.custom_calcHist(r)
         cv2.imshow('Red Channel', r)
 
         plt.plot(hist)
@@ -67,7 +67,7 @@ class ImageAnalysis:
 
     def greenChannel(self):
         b, g, r = cv2.split(self.image)
-        hist = cv2.calcHist([g], [0], None, [256], [0, 256])
+        hist = self.custom_calcHist(g)
         cv2.imshow('Green Channel', g)
 
         plt.plot(hist)
@@ -76,7 +76,7 @@ class ImageAnalysis:
     
     def blueChannel(self):
         b, g, r = cv2.split(self.image)
-        hist = cv2.calcHist([b], [0], None, [256], [0, 256])
+        hist = self.custom_calcHist(b)
         cv2.imshow('Blue Channel', b)
 
         plt.plot(hist)
@@ -104,3 +104,18 @@ class ImageAnalysis:
             print("Success!")
         else:
             print("Cancel!")
+
+    def custom_cvtColor(self, image):
+        gray_weights = np.array([0.114, 0.587, 0.299])
+        gray_image = np.dot(image[..., :3], gray_weights)
+        return gray_image.astype(np.uint8)
+    
+    def custom_calcHist(self, channel):
+
+        hist = np.zeros(256)
+
+        for row in channel:
+            for pixel in row:
+                hist[pixel] += 1
+
+        return hist
