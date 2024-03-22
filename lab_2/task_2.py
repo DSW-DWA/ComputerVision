@@ -1,95 +1,107 @@
-import time
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image
 
+def load_image(file_path):
+    return Image.open(file_path)
 
-# Загрузка изображения и преобразование в массив numpy
-def load_image(image_path):
-    image = Image.open(image_path)
-    return np.array(image)
+def save_image(image, file_path):
+    image.save(file_path)
 
+def get_pixel(image, x, y):
+    return image.getpixel((x, y))
 
-# Сохранение массива numpy как изображение
-def save_image(image_array, output_path):
-    image = Image.fromarray(image_array)
-    image.save(output_path)
+def set_pixel(image, x, y, value):
+    image.putpixel((x, y), value)
 
+def apply_kernel(image, kernel, f = False):
+    width, height = image.size
+    new_image = Image.new("L", (width, height))
 
-# Прямоугольный фильтр
-def average_filter(image_array, kernel_size=3):
-    return np.array(Image.fromarray(image_array).filter(ImageFilter.BoxBlur((kernel_size - 1) / 2)))
+    kernel_size = len(kernel)
+    offset = kernel_size // 2
 
+    for y in range(offset, height - offset):
+        for x in range(offset, width - offset):
+            new_pixel_value = 0
+            for ky in range(kernel_size):
+                for kx in range(kernel_size):
+                    pixel_value = get_pixel(image, x + kx - offset, y + ky - offset)
+                    new_pixel_value += pixel_value * kernel[ky][kx]
+            if f:
+                set_pixel(new_image, x, y, int(int(new_pixel_value)/kernel_size**2))
+            else:
+                set_pixel(new_image, x, y, int(new_pixel_value))
+    
+    return new_image
 
-# Медианный фильтр
-def median_filter(image_array, kernel_size=3):
-    return np.array(Image.fromarray(image_array).filter(ImageFilter.MedianFilter(size=kernel_size)))
+def absolute_difference(image1, image2):
+    width, height = image1.size
+    diff_image = Image.new("L", (width, height))
 
+    for y in range(height):
+        for x in range(width):
+            diff_value = abs(get_pixel(image1, x, y) - get_pixel(image2, x, y))
+            set_pixel(diff_image, x, y, diff_value)
+    
+    return diff_image
 
-# Фильтр Гаусса
-def gaussian_filter(image_array, sigma=1.0):
-    return np.array(Image.fromarray(image_array).filter(ImageFilter.GaussianBlur(radius=sigma)))
+def rectangular_filter(image, kernel_size):
+    kernel = [[1] * kernel_size for _ in range(kernel_size)]
+    return apply_kernel(image, kernel, True)
 
+def median_filter(image, kernel_size):
+    width, height = image.size
+    new_image = Image.new("L", (width, height))
 
-# Сигма-фильтр
-def sigma_filter(image_array, sigma=1.0, kernel_size=3):
-    pad_width = kernel_size // 2
-    padded_image = np.pad(image_array, pad_width=pad_width, mode='constant', constant_values=0)
-    result = np.zeros_like(image_array)
+    offset = kernel_size // 2
 
-    for x in range(image_array.shape[0]):
-        for y in range(image_array.shape[1]):
-            local_patch = padded_image[x:x+kernel_size, y:y+kernel_size]
-            local_mean = np.mean(local_patch)
-            local_std = np.std(local_patch)
+    for y in range(offset, height - offset):
+        for x in range(offset, width - offset):
+            pixel_values = []
+            for ky in range(kernel_size):
+                for kx in range(kernel_size):
+                    pixel_values.append(get_pixel(image, x + kx - offset, y + ky - offset))
+            median_value = sorted(pixel_values)[len(pixel_values) // 2]
+            set_pixel(new_image, x, y, median_value)
+    
+    return new_image
 
-            threshold = local_std * sigma
-            mask = np.abs(local_patch - local_mean) < threshold
-            result[x, y] = np.mean(local_patch[mask])
+def gaussian_filter(image, sigma):
+    kernel_size = int(6 * sigma + 1)
+    if kernel_size % 2 == 0:
+        kernel_size += 1
 
-    return result
+    offset = kernel_size // 2
+    kernel = [[0] * kernel_size for _ in range(kernel_size)]
 
+    for y in range(-offset, offset + 1):
+        for x in range(-offset, offset + 1):
+            kernel[y + offset][x + offset] = (
+                1 / (2 * np.pi * sigma**2) *
+                np.exp(-(x**2 + y**2) / (2 * sigma**2))
+            )
 
-# Визуальная оценка качества
-def absolute_difference(original, processed):
-    return np.abs(original - processed)
+    return apply_kernel(image, kernel)
 
+def sigma_filter(image, sigma):
+    blurred_image = gaussian_filter(image, sigma)
+    diff_image = absolute_difference(image, blurred_image)
+    return blurred_image, diff_image
 
-if __name__ == '__main__':
-    image_path = '../assets/image.png'
-    image_array = load_image(image_path)
+if __name__ == "__main__":
+    input_image = load_image("../assets/image_bw.jpg")
 
-    # Прямоугольный фильтр
-    start_time = time.time()
-    filtered_image_array = average_filter(image_array)
-    end_time = time.time()
-    print(f"Average filter took {end_time - start_time} seconds.")
-    save_image(filtered_image_array, 'task_2_result/average_filtered.jpg')
-    diff = absolute_difference(image_array, filtered_image_array)
-    save_image(diff.astype(np.uint8), 'task_2_result/average_filtered_difference.jpg')
+    rectangular_filtered_image = rectangular_filter(input_image, kernel_size=3)
 
-    # Медианный фильтр
-    start_time = time.time()
-    filtered_image_array = median_filter(image_array)
-    end_time = time.time()
-    print(f"Median filter took {end_time - start_time} seconds.")
-    save_image(filtered_image_array, 'task_2_result/median_filtered.jpg')
-    diff = absolute_difference(image_array, filtered_image_array)
-    save_image(diff.astype(np.uint8), 'task_2_result/median_filtered_difference.jpg')
+    median_filtered_image = median_filter(input_image, kernel_size=3)
 
-    # Фильтр Гаусса
-    start_time = time.time()
-    filtered_image_array = gaussian_filter(image_array, sigma=2.0)
-    end_time = time.time()
-    print(f"Gaussian filter took {end_time - start_time} seconds.")
-    save_image(filtered_image_array, 'task_2_result/gaussian_filtered.jpg')
-    diff = absolute_difference(image_array, filtered_image_array)
-    save_image(diff.astype(np.uint8), 'task_2_result/gaussian_filtered_difference.jpg')
+    gaussian_filtered_image = gaussian_filter(input_image, sigma=1)
 
-    # Сигма-фильтр
-    start_time = time.time()
-    filtered_image_array = sigma_filter(image_array, sigma=2.0)
-    end_time = time.time()
-    print(f"Sigma filter took {end_time - start_time} seconds.")
-    save_image(filtered_image_array, 'task_2_result/sigma_filtered.jpg')
-    diff = absolute_difference(image_array, filtered_image_array)
-    save_image(diff.astype(np.uint8), 'task_2_result/sigma_filtered_difference.jpg')
+    sigma_filtered_image, diff_image = sigma_filter(input_image, sigma=1)
+
+    save_image(rectangular_filtered_image, "task_2_result/rectangular_filtered_image.jpg")
+    save_image(median_filtered_image, "task_2_result/median_filtered_image.jpg")
+    save_image(gaussian_filtered_image, "task_2_result/gaussian_filtered_image.jpg")
+    save_image(sigma_filtered_image, "task_2_result/sigma_filtered_image.jpg")
+    save_image(diff_image, "task_2_result/absolute_difference_image.jpg")
+
