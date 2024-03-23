@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image
+import math
 
 
 def load_image(file_path):
@@ -99,16 +100,54 @@ def sigma_filter(image, sigma):
     return blurred_image, diff_image
 
 
+def sobel_operator(image):
+    width, height = image.size
+    Gx = [[1, 0, -1], [2, 0, -2], [1, 0, -1]]
+    Gy = [[1, 2, 1], [0, 0, 0], [-1, -2, -1]]
+
+    def get_gradient(x, y):
+        sum_x = sum_y = 0
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                if 0 <= x + j < width and 0 <= y + i < height:
+                    pixel_value = get_pixel(image, x + j, y + i)  # Изменено здесь
+                    sum_x += Gx[i + 1][j + 1] * pixel_value
+                    sum_y += Gy[i + 1][j + 1] * pixel_value
+        return math.sqrt(sum_x ** 2 + sum_y ** 2)
+
+    total_gradient = 0
+    for y in range(height):
+        for x in range(width):
+            total_gradient += get_gradient(x, y)
+
+    avg_gradient = total_gradient / (width * height)
+    return avg_gradient
+
+
+def sharpness_measure(image):
+    return sobel_operator(image)
+
+
 if __name__ == "__main__":
-    input_image = load_image("../assets/image.png")
+    input_image = load_image("../assets/image_bw.jpg")
 
     rectangular_filtered_image = rectangular_filter(input_image, kernel_size=3)
-
     median_filtered_image = median_filter(input_image, kernel_size=3)
-
     gaussian_filtered_image = gaussian_filter(input_image, sigma=1)
-
     sigma_filtered_image, diff_image = sigma_filter(input_image, sigma=1)
+
+    sharpness_level_original = sharpness_measure(input_image)
+    print(f"Уровень резкости исходного изображения: {sharpness_level_original}")
+    sharpness_level_rectangular = sharpness_measure(rectangular_filtered_image)
+    print(f"Уровень резкости после прямоугольного фильтра: {sharpness_level_rectangular}")
+    sharpness_level_median = sharpness_measure(median_filtered_image)
+    print(f"Уровень резкости после медианного фильтра: {sharpness_level_median}")
+    sharpness_level_gaussian = sharpness_measure(gaussian_filtered_image)
+    print(f"Уровень резкости после Гауссовского фильтра: {sharpness_level_gaussian}")
+    sharpness_level_sigma = sharpness_measure(sigma_filtered_image)
+    print(f"Уровень резкости после сигма-фильтрации: {sharpness_level_sigma}")
+    sharpness_level_diff = sharpness_measure(diff_image)
+    print(f"Уровень резкости разности изображений: {sharpness_level_diff}")
 
     save_image(rectangular_filtered_image, "task_2_result/rectangular_filtered_image.jpg")
     save_image(median_filtered_image, "task_2_result/median_filtered_image.jpg")
