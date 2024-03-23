@@ -110,6 +110,7 @@ def sigma_filter(image, sigma):
     return new_image
 
 
+
 def sobel_operator(image):
     width, height = image.size
     Gx = [[1, 0, -1], [2, 0, -2], [1, 0, -1]]
