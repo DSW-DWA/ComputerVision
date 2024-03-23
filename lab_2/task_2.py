@@ -76,8 +76,8 @@ def median_filter(image, kernel_size):
     return new_image
 
 
-def gaussian_filter(image, sigma):
-    kernel_size = int(6 * sigma + 1)
+def gaussian_filter(image, sigma, f=False):
+    kernel_size = int(6 * sigma - 1)
     if kernel_size % 2 == 0:
         kernel_size += 1
 
@@ -91,13 +91,23 @@ def gaussian_filter(image, sigma):
                     np.exp(-(x ** 2 + y ** 2) / (2 * sigma ** 2))
             )
 
-    return apply_kernel(image, kernel)
+    return apply_kernel(image, kernel, f)
 
 
 def sigma_filter(image, sigma):
-    blurred_image = gaussian_filter(image, sigma)
-    diff_image = absolute_difference(image, blurred_image)
-    return blurred_image, diff_image
+    width, height = image.size
+    new_image = Image.new("L", (width, height))
+    pixels = np.array(image).flatten()
+
+    for y in range(height):
+        for x in range(width):
+            pixel_value = image.getpixel((x, y))
+            indices = np.where((pixels > pixel_value - sigma) & (pixels < pixel_value + sigma))
+            selected_pixels = pixels[indices]
+            new_pixel_value = int(np.mean(selected_pixels))
+            new_image.putpixel((x, y), new_pixel_value)
+
+    return new_image
 
 
 def sobel_operator(image):
@@ -129,28 +139,29 @@ def sharpness_measure(image):
 
 
 if __name__ == "__main__":
-    input_image = load_image("../assets/image_bw.jpg")
+    input_image = load_image("../assets/noise_image.jpg")
 
-    rectangular_filtered_image = rectangular_filter(input_image, kernel_size=3)
-    median_filtered_image = median_filter(input_image, kernel_size=3)
+    # rectangular_filtered_image = rectangular_filter(input_image, kernel_size=3)
+    # median_filtered_image = median_filter(input_image, kernel_size=3)
     gaussian_filtered_image = gaussian_filter(input_image, sigma=1)
-    sigma_filtered_image, diff_image = sigma_filter(input_image, sigma=1)
+    # sigma_filtered_image= sigma_filter(input_image, sigma=100)
+    diff_image = absolute_difference(input_image, gaussian_filtered_image)
 
-    sharpness_level_original = sharpness_measure(input_image)
-    print(f"Уровень резкости исходного изображения: {sharpness_level_original}")
-    sharpness_level_rectangular = sharpness_measure(rectangular_filtered_image)
-    print(f"Уровень резкости после прямоугольного фильтра: {sharpness_level_rectangular}")
-    sharpness_level_median = sharpness_measure(median_filtered_image)
-    print(f"Уровень резкости после медианного фильтра: {sharpness_level_median}")
-    sharpness_level_gaussian = sharpness_measure(gaussian_filtered_image)
-    print(f"Уровень резкости после Гауссовского фильтра: {sharpness_level_gaussian}")
-    sharpness_level_sigma = sharpness_measure(sigma_filtered_image)
-    print(f"Уровень резкости после сигма-фильтрации: {sharpness_level_sigma}")
-    sharpness_level_diff = sharpness_measure(diff_image)
-    print(f"Уровень резкости разности изображений: {sharpness_level_diff}")
+    # sharpness_level_original = sharpness_measure(input_image)
+    # print(f"Уровень резкости исходного изображения: {sharpness_level_original}")
+    # sharpness_level_rectangular = sharpness_measure(rectangular_filtered_image)
+    # print(f"Уровень резкости после прямоугольного фильтра: {sharpness_level_rectangular}")
+    # sharpness_level_median = sharpness_measure(median_filtered_image)
+    # print(f"Уровень резкости после медианного фильтра: {sharpness_level_median}")
+    # sharpness_level_gaussian = sharpness_measure(gaussian_filtered_image)
+    # print(f"Уровень резкости после Гауссовского фильтра: {sharpness_level_gaussian}")
+    # sharpness_level_sigma = sharpness_measure(sigma_filtered_image)
+    # print(f"Уровень резкости после сигма-фильтрации: {sharpness_level_sigma}")
+    # sharpness_level_diff = sharpness_measure(diff_image)
+    # print(f"Уровень резкости разности изображений: {sharpness_level_diff}")
 
-    save_image(rectangular_filtered_image, "task_2_result/rectangular_filtered_image.jpg")
-    save_image(median_filtered_image, "task_2_result/median_filtered_image.jpg")
+    # save_image(rectangular_filtered_image, "task_2_result/rectangular_filtered_image.jpg")
+    # save_image(median_filtered_image, "task_2_result/median_filtered_image.jpg")
     save_image(gaussian_filtered_image, "task_2_result/gaussian_filtered_image.jpg")
-    save_image(sigma_filtered_image, "task_2_result/sigma_filtered_image.jpg")
-    save_image(diff_image, "task_2_result/absolute_difference_image.jpg")
+    # save_image(sigma_filtered_image, "task_2_result/sigma_filtered_image.jpg")
+    # save_image(diff_image, "task_2_result/absolute_difference_image.jpg")
