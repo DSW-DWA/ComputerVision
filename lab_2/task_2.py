@@ -76,26 +76,32 @@ def median_filter(image, kernel_size):
     return new_image
 
 
-def gaussian_filter(image, sigma):
-    kernel_size = int(6 * sigma + 1)
-    if kernel_size % 2 == 0:
-        kernel_size += 1
-
-    offset = kernel_size // 2
-    kernel = [[0] * kernel_size for _ in range(kernel_size)]
-
-    for y in range(-offset, offset + 1):
-        for x in range(-offset, offset + 1):
-            kernel[y + offset][x + offset] = (
-                    1 / (2 * np.pi * sigma ** 2) *
-                    np.exp(-(x ** 2 + y ** 2) / (2 * sigma ** 2))
-            )
-
-    return apply_kernel(image, kernel)
+# Функция для создания Гауссова ядра с помощью numpy
+def generate_gaussian_kernel_np(k, sigma):
+    ax = np.arange(-k, k + 1)
+    xx, yy = np.meshgrid(ax, ax)
+    kernel = np.exp(-(xx ** 2 + yy ** 2) / (2. * sigma ** 2))
+    return kernel / np.sum(kernel)
 
 
-def sigma_filter(image, sigma):
-    blurred_image = gaussian_filter(image, sigma)
+# Функция для применения Гауссова фильтра
+def gaussian_filter(image, k, sigma):
+    image = np.array(image)
+
+    kernel = generate_gaussian_kernel_np(k, sigma)
+    padded_image = np.pad(image, k, mode='constant')
+    filtered_image = np.zeros_like(image)
+
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            window = padded_image[i:i + 2 * k + 1, j:j + 2 * k + 1]
+            filtered_image[i, j] = np.sum(window * kernel)
+
+    return Image.fromarray(filtered_image.astype('uint8'))
+
+
+def sigma_filter(image, k, sigma):
+    blurred_image = gaussian_filter(image, k, sigma)
     diff_image = absolute_difference(image, blurred_image)
     return blurred_image, diff_image
 
@@ -133,8 +139,8 @@ if __name__ == "__main__":
 
     rectangular_filtered_image = rectangular_filter(input_image, kernel_size=3)
     median_filtered_image = median_filter(input_image, kernel_size=3)
-    gaussian_filtered_image = gaussian_filter(input_image, sigma=1)
-    sigma_filtered_image, diff_image = sigma_filter(input_image, sigma=1)
+    gaussian_filtered_image = gaussian_filter(input_image, k=1, sigma=1)
+    sigma_filtered_image, diff_image = sigma_filter(input_image, k=2, sigma=1)
 
     sharpness_level_original = sharpness_measure(input_image)
     print(f"Уровень резкости исходного изображения: {sharpness_level_original}")
