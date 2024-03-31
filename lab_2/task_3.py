@@ -19,9 +19,13 @@ def unsharp_masking(image_array, filter_coefficients, lambda_coefficient, filter
 
 if __name__ == '__main__':
     input_image = load_image("../assets/image_bw.jpg")
-    sharp_image = unsharp_masking(input_image, filter_coefficients=3, lambda_coefficient=1.5, filter=rectangular_filter)
-    sharp_image.save('task_3_result/sharp_image_rect.jpg')
-    sharp_image = unsharp_masking(input_image, filter_coefficients=1.2, lambda_coefficient=1.5, filter=gaussian_filter)
-    sharp_image.save('task_3_result/sharp_image_gauss.jpg')
-    sharp_image = unsharp_masking(input_image, filter_coefficients=3, lambda_coefficient=1.5, filter=median_filter)
-    sharp_image.save('task_3_result/sharp_image_median.jpg')
+    # sharp_image = unsharp_masking(input_image, filter_coefficients=3, lambda_coefficient=1.5, filter=rectangular_filter)
+    # sharp_image.save('task_3_result/sharp_image_rect.jpg')
+    for sigma in [1, 1.2, 1.5]:
+        for lambda_ in [1, 1.2, 1.5]:
+            sharp_image = unsharp_masking(input_image, filter_coefficients=sigma, lambda_coefficient=lambda_, filter=gaussian_filter)
+            sharp_image.save(f'task_3_result_view/sharp_image_gauss_{sigma}_{lambda_}.jpg')
+    # sharp_image = unsharp_masking(input_image, filter_coefficients=1.2, lambda_coefficient=1.5, filter=gaussian_filter)
+    # sharp_image.save('task_3_result/sharp_image_gauss.jpg')
+    # sharp_image = unsharp_masking(input_image, filter_coefficients=3, lambda_coefficient=1.5, filter=median_filter)
+    # sharp_image.save('task_3_result/sharp_image_median.jpg')
