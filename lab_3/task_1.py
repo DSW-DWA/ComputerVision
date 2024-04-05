@@ -4,11 +4,14 @@ import time
 from PIL import Image
 import math
 
+
 def load_image(file_path):
     return Image.open(file_path).convert('L')
 
+
 def save_image(image, file_path):
     image.save(file_path)
+
 
 def sobel_filter(image, kernel_size):
     width, height = image.size
@@ -46,17 +49,22 @@ def sobel_filter(image, kernel_size):
                              [1, 2, 3, 4, 3, 2, 1],
                              [2, 3, 4, 5, 4, 3, 2],
                              [3, 4, 5, 6, 5, 4, 3]])
-    
+
     new_image = Image.new("L", (width, height))
 
-    for y in range(((kernel_size-1)//2), height - ((kernel_size-1)//2)):
-        for x in range(((kernel_size-1)//2), width - ((kernel_size-1)//2)):
-            pixel_x = sum(image.getpixel((x + i, y + j)) * kernel_x[i][j] for i in range(-1 * ((kernel_size-1)//2), ((kernel_size-1)//2 +1)) for j in range(-1 * ((kernel_size-1)//2), ((kernel_size-1)//2 +1)))
-            pixel_y = sum(image.getpixel((x + i, y + j)) * kernel_y[i][j] for i in range(-1 * ((kernel_size-1)//2), ((kernel_size-1)//2 +1)) for j in range(-1 * ((kernel_size-1)//2), ((kernel_size-1)//2 +1)))
-            gradient_magnitude = int(math.sqrt(pixel_x**2 + pixel_y**2))
+    for y in range(((kernel_size - 1) // 2), height - ((kernel_size - 1) // 2)):
+        for x in range(((kernel_size - 1) // 2), width - ((kernel_size - 1) // 2)):
+            pixel_x = sum(image.getpixel((x + i, y + j)) * kernel_x[i][j] for i in
+                          range(-1 * ((kernel_size - 1) // 2), ((kernel_size - 1) // 2 + 1)) for j in
+                          range(-1 * ((kernel_size - 1) // 2), ((kernel_size - 1) // 2 + 1)))
+            pixel_y = sum(image.getpixel((x + i, y + j)) * kernel_y[i][j] for i in
+                          range(-1 * ((kernel_size - 1) // 2), ((kernel_size - 1) // 2 + 1)) for j in
+                          range(-1 * ((kernel_size - 1) // 2), ((kernel_size - 1) // 2 + 1)))
+            gradient_magnitude = int(math.sqrt(pixel_x ** 2 + pixel_y ** 2))
             new_image.putpixel((x, y), gradient_magnitude)
 
     return new_image
+
 
 def main():
     input_image = load_image("../assets/image_bw.jpg")
@@ -69,6 +77,7 @@ def main():
         print(f"Kernel size {kernel_size}x{kernel_size}: {end_time - start_time:.5f} seconds")
 
         save_image(sobel_result, f"./task_1_result/sobel_{kernel_size}x{kernel_size}.jpg")
+
 
 if __name__ == "__main__":
     main()
