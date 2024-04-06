@@ -67,7 +67,7 @@ def sobel_filter(image, kernel_size):
 
 
 def main():
-    input_image = load_image("../assets/image_bw.jpg")
+    input_image = load_image("../assets/cars.jpg")
 
     kernel_sizes = [3, 5, 7]
     for kernel_size in kernel_sizes:
@@ -76,7 +76,7 @@ def main():
         end_time = time.time()
         print(f"Kernel size {kernel_size}x{kernel_size}: {end_time - start_time:.5f} seconds")
 
-        save_image(sobel_result, f"./task_1_result/sobel_{kernel_size}x{kernel_size}.jpg")
+        save_image(sobel_result, f"./task_1_result/cars_sobel_{kernel_size}x{kernel_size}.jpg")
 
 
 if __name__ == "__main__":

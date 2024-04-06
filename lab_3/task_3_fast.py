@@ -29,6 +29,12 @@ def convolve2d(image, kernel):
 
     return convolved
 
+def difference_of_gaussians(image, kernel_size=5, sigma=1.0, k=1.6):
+    gaussian_k1 = gaussian_kernel(kernel_size, sigma)
+    gaussian_k2 = gaussian_kernel(kernel_size, sigma * k)
+    gaussian1 = convolve2d(image, gaussian_k1)
+    gaussian2 = convolve2d(image, gaussian_k2)
+    return gaussian1 - gaussian2
 
 def laplacian_of_gaussian(image, kernel_size=5, sigma=1.0):
     gaussian_k = gaussian_kernel(kernel_size, sigma)
@@ -62,15 +68,19 @@ def sobel_filter(image, kernel_x, kernel_y):
 
     return new_image
 
-def process_frame(frame):
+def process_frame(frame, process):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    # kernel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
-    # kernel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
-    # sobel_result = sobel_filter(frame, kernel_x, kernel_y)
-    log_image = laplacian_of_gaussian(frame, sigma=1.0999)
-    return log_image
+    if (process == 'sobel'):
+        kernel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+        kernel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
+        result = sobel_filter(frame, kernel_x, kernel_y)
+    if (process == 'log'):
+        result = laplacian_of_gaussian(frame, sigma=1.0999)
+    if (process == 'dog'):
+        result = difference_of_gaussians(frame, sigma=0.86, k=0.86)
+    return result
 
-def video_processing(input_path, skip_frames=5):
+def video_processing(input_path, skip_frames=5, process='sobel'):
     cap = cv2.VideoCapture(input_path)
 
     if not cap.isOpened():
@@ -83,7 +93,7 @@ def video_processing(input_path, skip_frames=5):
         if ret:
             if frame_counter % (skip_frames + 1) == 0:
                 start_time = time.time()
-                processed_frame = process_frame(frame)
+                processed_frame = process_frame(frame, process)
                 end_time = time.time()
                 execution_time = end_time - start_time
 
@@ -101,5 +111,5 @@ def video_processing(input_path, skip_frames=5):
 
 
 if __name__ == "__main__":
-    input_video_path = '../assets/video.mp4'
-    video_processing(input_video_path, skip_frames=7)
+    input_video_path = '../assets/sample_640x360.mp4'
+    video_processing(input_video_path, skip_frames=1, process='sobel')
