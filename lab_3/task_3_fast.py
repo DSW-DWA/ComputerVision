@@ -5,6 +5,39 @@ import math
 from concurrent.futures import ThreadPoolExecutor
 from numba import jit
 
+def gaussian_kernel(size, sigma=1.0):
+    size = int(size) // 2
+    x, y = np.mgrid[-size:size + 1, -size:size + 1]
+    normal = 1 / (2.0 * np.pi * sigma ** 2)
+    g = np.exp(-((x ** 2 + y ** 2) / (2.0 * sigma ** 2))) * normal
+    return g
+
+@jit(nopython=True)
+def convolve2d(image, kernel):
+    kernel_height, kernel_width = kernel.shape
+    pad_height = kernel_height // 2
+    pad_width = kernel_width // 2
+
+    padded_image = np.zeros((image.shape[0] + pad_height * 2, image.shape[1] + pad_width * 2))
+    padded_image[pad_height:padded_image.shape[0] - pad_height, pad_width:padded_image.shape[1] - pad_width] = image
+
+    convolved = np.zeros(image.shape)
+
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            convolved[i, j] = np.sum(kernel * padded_image[i:i + kernel_height, j:j + kernel_width])
+
+    return convolved
+
+
+def laplacian_of_gaussian(image, kernel_size=5, sigma=1.0):
+    gaussian_k = gaussian_kernel(kernel_size, sigma)
+    smoothed_image = convolve2d(image, gaussian_k)
+    laplacian_k = np.array([[0, 1, 0],
+                            [1, -4, 1],
+                            [0, 1, 0]])
+    return convolve2d(smoothed_image, laplacian_k)
+
 @jit(nopython=True)
 def process_chunk(image, new_image, kernel_x, kernel_y, chunk):
     for x in range(chunk[0], chunk[0] + chunk[2]):
@@ -31,10 +64,11 @@ def sobel_filter(image, kernel_x, kernel_y):
 
 def process_frame(frame):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    kernel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
-    kernel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
-    sobel_result = sobel_filter(frame, kernel_x, kernel_y)
-    return sobel_result
+    # kernel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+    # kernel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
+    # sobel_result = sobel_filter(frame, kernel_x, kernel_y)
+    log_image = laplacian_of_gaussian(frame, sigma=1.0999)
+    return log_image
 
 def video_processing(input_path):
     cap = cv2.VideoCapture(input_path)
