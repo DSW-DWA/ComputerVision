@@ -70,32 +70,36 @@ def process_frame(frame):
     log_image = laplacian_of_gaussian(frame, sigma=1.0999)
     return log_image
 
-def video_processing(input_path):
+def video_processing(input_path, skip_frames=5):
     cap = cv2.VideoCapture(input_path)
 
     if not cap.isOpened():
         print("Error opening video file")
 
+    frame_counter = 0
+
     while cap.isOpened():
         ret, frame = cap.read()
         if ret:
-            start_time = time.time()
-            processed_frame = process_frame(frame)
-            end_time = time.time()
-            execution_time = end_time - start_time
+            if frame_counter % (skip_frames + 1) == 0:
+                start_time = time.time()
+                processed_frame = process_frame(frame)
+                end_time = time.time()
+                execution_time = end_time - start_time
 
-            cv2.imshow('Frame', processed_frame)
+                cv2.imshow('Frame', processed_frame)
 
-            current_frame = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-            print(f'Current frame: {current_frame} , Execution time: {execution_time:.5f} seconds')
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-                break
+                print(f'Processed Frame: {frame_counter} , Execution time: {execution_time:.5f} seconds')
+                if cv2.waitKey(25) & 0xFF == ord('q'):
+                    break
+            frame_counter += 1
         else:
             break
 
     cap.release()
     cv2.destroyAllWindows()
 
+
 if __name__ == "__main__":
-    input_video_path = '../assets/sample_640x360.mp4'
-    video_processing(input_video_path)
+    input_video_path = '../assets/video.mp4'
+    video_processing(input_video_path, skip_frames=7)
