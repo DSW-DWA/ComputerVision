@@ -58,7 +58,7 @@ def draw_optical_flow_hs(frame, u, v, step=16):
     h, w = frame.shape[:2]
     for y in range(0, h, step):
         for x in range(0, w, step):
-            if np.sqrt(u[y, x] ** 2 + v[y, x] ** 2) > 1:  # Draw only significant vectors
+            if np.sqrt(u[y, x] ** 2 + v[y, x] ** 2) > 1:
                 end_point = (int(x + u[y, x] * 10), int(y + v[y, x] * 10))
                 cv2.arrowedLine(frame, (x, y), end_point, (0, 255, 0), 1, tipLength=0.3)
     return frame
@@ -109,7 +109,7 @@ def process_video(video_path, output_path):
     out.release()
 
 
-video_path = '../assets/6979414-sd_640_360_30fps.mp4'
+video_path = '../assets/barber_pole.mp4'
 output_path = 'output_6979414-sd_640_360_30fps.mp4'
 
 process_video(video_path, output_path)
