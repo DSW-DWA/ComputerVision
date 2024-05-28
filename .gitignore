@@ -5,3 +5,4 @@ __pycache__
 .DS_Store
 .ipynb_checkpoints
 image-craft
+img_align_celeba
